@@ -1,0 +1,33 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - README.md
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - README.md
+  #allows you to run this workflow manually from the action tab
+  workflow_dispatch:
+    
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
+    - name: Login to Docker Hub
+      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin "${{ secrets.DOCKERHUB_URL }}"
+  
+      - docker build -t "$DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_USERNAME/simple-python-flask-app:latest" .
+      - docker push "$DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_USERNAME/simple-python-flask-app:latest"
+    
+    - name: Build Docker image
+      run: docker build -t "${{ secrets.DOCKERHUB_URL }}/${{ secrets.DOCKERHUB_USERNAME }}"/cicd-by-git:latest .
+    
+    - name: Push Docker image to Docker Hub
+      run: docker push "${{ secrets.DOCKERHUB_URL }}/${{ secrets.DOCKERHUB_USERNAME }}"/cicd-by-git:latest
